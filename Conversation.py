@@ -29,6 +29,7 @@ class Conversation:
         self.myTmpPubKey = 1
         self.myTmpSign = 1
         self.myTmpPubSign = 1
+        self.mutex = threading.Lock()
 
     def generateKey(self):
         (myPubKey, myKey) = rsa.newkeys(1024)
@@ -72,6 +73,8 @@ class Conversation:
         self.messagesToSent = []
 
     def handleNewMessages(self):
+        while not self.mutex.acquire():
+            time.sleep(0.001)
         for message in self.newMessages:
             message = self.decode(message[0], message[1], message[2], message[3])
             if message.startswith("New sign"):
@@ -94,6 +97,7 @@ class Conversation:
             else:
                 print(message)
         self.newMessages = []
+        self.mutex.release()
 
     def changeEncryption(self):
         self.myTmpPubKey, self.myTmpKey, self.myTmpPubSign, self.myTmpSign = self.generateKey()

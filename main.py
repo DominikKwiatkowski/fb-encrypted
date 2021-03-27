@@ -3,6 +3,10 @@ from Conversation import Conversation
 from threading import Thread
 import asyncio
 import time
+
+from Listener import Listener
+
+
 def fetcher(client: fbchat.Client):
     users = client.fetch_users()
 
@@ -16,14 +20,18 @@ def fbtest():
     password = "dom.Kwiatek1"
     session = fbchat.Session.login(email, password)
     client = fbchat.Client(session=session)
-    listener = fbchat.Listener(session=session, chat_on=False, foreground=False)
+    users = fetcher(client)
+    conversations = []
+    for user in users:
+        conversations.append(Conversation(user))
+    listener = Listener(conversations, session)
+    listener.start()
     print("Own id: {}".format(session.user.id))
-    for event in listener.listen():
-        if isinstance(event, fbchat.MessageEvent):
-            print(f"{event.message.text} from {event.author.id} in {event.thread.id}")
-            if event.author.id != session.user.id:
-                text = input()
-                event.author.send_text(text)
+    while True:
+        time.sleep(10)
+        for conversation in conversations:
+            conversation.handleNewMessages()
+
     session.logout()
 #print("Podaj email")
 #email = input()
@@ -68,9 +76,10 @@ def test1(conversation, conversation1):
     conversation1.handleNewMessages()
 
 
-conversation = Conversation(1)
-conversation1 = Conversation(conversation)
-conversation.user = conversation1
-test(conversation, conversation1)
-test1(conversation, conversation1)
-#fbtest()
+
+#conversation = Conversation(1)
+#conversation1 = Conversation(conversation)
+#conversation.user = conversation1
+#test(conversation, conversation1)
+#test1(conversation, conversation1)
+fbtest()
