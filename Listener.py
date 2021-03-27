@@ -27,3 +27,4 @@ class Listener(threading.Thread):
                                 time.sleep(0.001)
                             conversation.newMessages.append(message)
                             conversation.mutex.release()
+                            conversation.handleNewMessages()

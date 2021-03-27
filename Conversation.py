@@ -68,8 +68,10 @@ class Conversation:
     def sendMessages(self):
         for message in self.messagesToSent:
             key, signature, message, iv = self.encrypt(message)
-
-            self.user.newMessages.append([key, signature, message, iv])
+            if self.myMode == 1:
+                self.user.send_text(",".join([key, signature, message, iv]))
+            else:
+                self.user.send_text(message)
         self.messagesToSent = []
 
     def handleNewMessages(self):

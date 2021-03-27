@@ -26,11 +26,18 @@ def fbtest():
         conversations.append(Conversation(user))
     listener = Listener(conversations, session)
     listener.start()
+    input()
     print("Own id: {}".format(session.user.id))
+    conversation = conversations[0]
+    conversation.changeEncryption()
+    time.sleep(5)
     while True:
-        time.sleep(10)
-        for conversation in conversations:
-            conversation.handleNewMessages()
+        message = input()
+        if message == "change":
+            conversation.changeEncryption()
+            time.sleep(5)
+        conversation.messagesToSent.append(message)
+        conversation.sendMessages()
 
     session.logout()
 #print("Podaj email")
