@@ -74,12 +74,12 @@ class Conversation(threading.Thread):
             if message.startswith("New sign"):
                 message = message[len("New sign"):]
                 self.messagesToSent.append("@cceptedSign")
-                self.convSign = rsa.PublicKey.load_pkcs1(message.encode(encoding="latin-1"), 'DER')
+                self.convSign = rsa.PublicKey.load_pkcs1(bytes.fromhex(message), 'DER')
                 self.sendMessages()
             elif message.startswith("New key"):
                 message = message[len("New key"):]
                 self.messagesToSent.append("@cceptedKey")
-                self.convKey = rsa.PublicKey.load_pkcs1(message.encode(encoding="latin-1"), 'DER')
+                self.convKey = rsa.PublicKey.load_pkcs1(bytes.fromhex(message), 'DER')
                 self.sendMessages()
                 self.convMode = 1
             else:
@@ -88,7 +88,7 @@ class Conversation(threading.Thread):
 
     def changeEncryption(self):
         myPubKey, myKey, myPubSign, mySign = self.generateKey()
-        self.messagesToSent.append("New sign" + str(myPubSign.save_pkcs1('DER'), encoding="latin-1"))
+        self.messagesToSent.append("New sign" + myPubSign.save_pkcs1('DER').hex())
         self.sendMessages()
         time.sleep(3)
         # send my pub sign
@@ -97,7 +97,7 @@ class Conversation(threading.Thread):
             if message == "@cceptedSign":
                 self.mySign = mySign
                 self.myPubSign = myPubSign
-                self.messagesToSent.append("New key" + str(myPubKey.save_pkcs1('DER'), encoding="latin-1"))
+                self.messagesToSent.append("New key" + myPubKey.save_pkcs1('DER').hex())
                 self.sendMessages()
                 time.sleep(3)
                 for message1 in self.newMessages:
