@@ -30,35 +30,43 @@ def fbtest():
 #print("podaj haslo")
 #password = input()
 
-
-
 def test(conversation, conversation1):
-    conversation1.start()
-    print(conversation.changeEncryption())
-    conversation1.join(10)
+    conversation.changeEncryption()
+    conversation1.handleNewMessages()
+    conversation.handleNewMessages()
+    conversation1.handleNewMessages()
+    conversation.handleNewMessages()
 
-    conversation.start()
-    print(conversation1.changeEncryption())
-    conversation.join(10)
+    conversation1.changeEncryption()
+    conversation.handleNewMessages()
+    conversation1.handleNewMessages()
+    conversation.handleNewMessages()
+    conversation1.handleNewMessages()
 
     conversation.messagesToSent.append("Ala ma kota")
     conversation.messagesToSent.append("Dominik kocha Ole")
     conversation.sendMessages()
     conversation1.handleNewMessages()
+
 
 def test1(conversation, conversation1):
-    conversation1.run()
-    print(conversation.changeEncryption())
-    conversation1.join(10)
+    conversation.changeEncryption()
+    conversation1.handleNewMessages()
+    conversation.handleNewMessages()
+    conversation1.handleNewMessages()
+    conversation.handleNewMessages()
 
-    conversation.run()
-    print(conversation1.changeEncryption())
-    conversation.join(10)
+    conversation1.changeEncryption()
+    conversation.handleNewMessages()
+    conversation1.handleNewMessages()
+    conversation.handleNewMessages()
+    conversation1.handleNewMessages()
 
     conversation.messagesToSent.append("Ala ma kota")
     conversation.messagesToSent.append("Dominik kocha Ole")
     conversation.sendMessages()
     conversation1.handleNewMessages()
+
 
 conversation = Conversation(1)
 conversation1 = Conversation(conversation)

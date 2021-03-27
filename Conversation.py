@@ -9,10 +9,9 @@ import time
 
 # s/mine check
 # as-128
-class Conversation(threading.Thread):
+class Conversation:
 
     def __init__(self, user):
-        threading.Thread.__init__(self)
         self.myKey = 1
         self.myPubKey = 1
         self.convKey = 1
@@ -26,6 +25,10 @@ class Conversation(threading.Thread):
         # 0 - non-encrypted 1 - encrypted
         self.myMode = 0
         self.convMode = 0
+        self.myTmpKey = 1
+        self.myTmpPubKey = 1
+        self.myTmpSign = 1
+        self.myTmpPubSign = 1
 
     def generateKey(self):
         (myPubKey, myKey) = rsa.newkeys(1024)
@@ -74,45 +77,37 @@ class Conversation(threading.Thread):
             if message.startswith("New sign"):
                 message = message[len("New sign"):]
                 self.messagesToSent.append("@cceptedSign")
-                self.convSign = rsa.PublicKey.load_pkcs1(bytes.fromhex(message), 'DER')
                 self.sendMessages()
+                self.convSign = rsa.PublicKey.load_pkcs1(bytes.fromhex(message), 'DER')
+
             elif message.startswith("New key"):
                 message = message[len("New key"):]
                 self.messagesToSent.append("@cceptedKey")
-                self.convKey = rsa.PublicKey.load_pkcs1(bytes.fromhex(message), 'DER')
                 self.sendMessages()
+                self.convKey = rsa.PublicKey.load_pkcs1(bytes.fromhex(message), 'DER')
+
                 self.convMode = 1
+            elif message.startswith("@cceptedSign"):
+                self.changeEncryptionSign()
+            elif message.startswith("@cceptedKey"):
+                self.changeEncryptionKey()
             else:
                 print(message)
         self.newMessages = []
 
     def changeEncryption(self):
-        myPubKey, myKey, myPubSign, mySign = self.generateKey()
-        self.messagesToSent.append("New sign" + myPubSign.save_pkcs1('DER').hex())
+        self.myTmpPubKey, self.myTmpKey, self.myTmpPubSign, self.myTmpSign = self.generateKey()
+        self.messagesToSent.append("New sign" + self.myTmpPubSign.save_pkcs1('DER').hex())
         self.sendMessages()
-        time.sleep(3)
-        # send my pub sign
-        for message in self.newMessages:
-            message = self.decode(message[0], message[1], message[2],message[3])
-            if message == "@cceptedSign":
-                self.mySign = mySign
-                self.myPubSign = myPubSign
-                self.messagesToSent.append("New key" + myPubKey.save_pkcs1('DER').hex())
-                self.sendMessages()
-                time.sleep(3)
-                for message1 in self.newMessages:
-                    message1 = self.decode(message1[0], message1[1], message1[2],message1[3])
-                    if message1 == "@cceptedKey":
-                        self.myKey = myKey
-                        self.myPubKey = myPubKey
-                        self.myMode = 1
-                        break
-                break
-        self.newMessages = []
-        return self.myMode
 
-    def run(self):
-        time.sleep(1.5)
-        self.handleNewMessages()
-        time.sleep(3)
-        self.handleNewMessages()
+
+    def changeEncryptionSign(self):
+        self.mySign = self.myTmpSign
+        self.myPubSign = self.myTmpPubSign
+        self.messagesToSent.append("New key" + self.myTmpPubKey.save_pkcs1('DER').hex())
+        self.sendMessages()
+
+    def changeEncryptionKey(self):
+        self.myKey = self.myTmpKey
+        self.myPubKey = self.myTmpPubKey
+        self.myMode = 1
