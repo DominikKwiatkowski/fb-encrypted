@@ -16,8 +16,10 @@ def fetcher(client: fbchat.Client):
     return users
 
 def fbtest():
-    email = "dom.kwiatek@wp.pl"
-    password = "dom.Kwiatek1"
+    print("Podaj email")
+    email = input()
+    print("podaj haslo")
+    password = input()
     session = fbchat.Session.login(email, password)
     client = fbchat.Client(session=session)
     users = fetcher(client)
@@ -40,10 +42,7 @@ def fbtest():
         conversation.sendMessages()
 
     session.logout()
-#print("Podaj email")
-#email = input()
-#print("podaj haslo")
-#password = input()
+
 
 def test(conversation, conversation1):
     conversation.changeEncryption()
@@ -59,7 +58,6 @@ def test(conversation, conversation1):
     conversation1.handleNewMessages()
 
     conversation.messagesToSent.append("Ala ma kota")
-    conversation.messagesToSent.append("Dominik kocha Ole")
     conversation.sendMessages()
     conversation1.handleNewMessages()
 
@@ -78,7 +76,6 @@ def test1(conversation, conversation1):
     conversation1.handleNewMessages()
 
     conversation.messagesToSent.append("Ala ma kota")
-    conversation.messagesToSent.append("Dominik kocha Ole")
     conversation.sendMessages()
     conversation1.handleNewMessages()
 

@@ -1,4 +1,5 @@
 import os
+import sys
 import threading
 import rsa
 import fbchat
@@ -42,14 +43,17 @@ class Conversation:
             signature = bytes.fromhex(signature)
             message = bytes.fromhex(message)
             iv = bytes.fromhex(iv)
-            if rsa.verify(key, signature, self.convSign):
-                key = rsa.decrypt(key, self.myKey)
-                iv = rsa.decrypt(iv, self.myKey)
-                aes_dec = AES.new(key, AES.MODE_CBC, iv)
-                message = unpad(aes_dec.decrypt(message),AES.block_size)
-                return message.decode('UTF-8')
-            else:
-                print("Verification failed")
+            try:
+                if rsa.verify(key + message + iv, signature, self.convSign):
+                    key = rsa.decrypt(key, self.myKey)
+                    iv = rsa.decrypt(iv, self.myKey)
+                    aes_dec = AES.new(key, AES.MODE_CBC, iv)
+                    message = unpad(aes_dec.decrypt(message),AES.block_size)
+                    return message.decode('UTF-8')
+            except:
+                print(sys.exc_info()[0])
+            return ""
+
         else:
             return message
 
@@ -59,9 +63,10 @@ class Conversation:
             key = os.urandom(16)
             aes_enc = AES.new(key, AES.MODE_CBC)
             encrypted_key = rsa.encrypt(key, self.convKey)
-            encrypted_message = aes_enc.encrypt(pad(message, AES.block_size)).hex()
-            return encrypted_key.hex(), rsa.sign(encrypted_key, self.mySign, "SHA-1").hex(), encrypted_message, \
-                rsa.encrypt(aes_enc.iv, self.convKey).hex()
+            encrypted_message = aes_enc.encrypt(pad(message, AES.block_size))
+            encrypted_iv = rsa.encrypt(aes_enc.iv, self.convKey)
+            return encrypted_key.hex(), rsa.sign(encrypted_key + encrypted_message + encrypted_iv, self.mySign, "SHA-1").hex(), encrypted_message.hex(), \
+                encrypted_iv.hex()
         else:
             return "", "", message,""
 
